@@ -1,0 +1,66 @@
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: #3D4C57;
+  font-family: "Avenir Next W00","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#viewDiv {
+  /* width: calc(100% - 200px); */
+}
+
+section {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  color: white;
+  text-align: center;
+  padding: 0.1em 2em;
+  background-color: rgba(61, 76, 87, 0.2);
+  max-width: 300px;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+  border-bottom: 1px dashed white;
+}
+
+.dashboard-component {
+  width: 100px;
+  height: 100px;
+  float: left;
+}
+
+#dashboardConfirmed {
+  color: #ffdd30;
+}
+
+#dashboardDeaths {
+  color: #ff3a30;
+}
+
+#dashboardRecovered {
+  color: #83E478;
+}
+
+.dashboard-number {
+  font-size: 1.5em;
+}
+
+.extra{
+  font-size: 0.8em;
+}
+
+#dashboard-scatterchart {
+  height: 300px;
+}
+
+#dashboardLinechart {
+  height: 500px;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1">
+  <title>Earthquakes</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+  <script src="https://js.arcgis.com/4.14/"></script>
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <section>
+    <h1>Corona Virus 2020</h1>
+    <div>
+
+    </div>
+    
+    <div class="dashboard-component"><div id="dashboardConfirmed" class="dashboard-number"></div><div class="extra">Confirmed</div></div>
+    <div class="dashboard-component"><div id="dashboardRecovered" class="dashboard-number"></div><div class="extra">Recovered</div></div>
+    <div class="dashboard-component"><div id="dashboardDeaths" class="dashboard-number"></div><div class="extra">Deaths</div></div>
+  
+    <canvas id="dashboardLinechart"></canvas>
+    <canvas id="dashboard-scatterchart"></canvas>
+  </section>
+</body>
+
+</html>
