@@ -139,6 +139,9 @@ require([
     container: "viewDiv",
     map: map,
     // qualityProfile: "high",
+    padding: {
+      right: 300,
+    },
     environment: {
       background: {
         type: "color",
@@ -218,7 +221,7 @@ require([
 
       var scale = 5;
 
-      var width = 30000 * scale;
+      var width = 60000 * scale;
 
       var minValue = 0; //Math.max(result.min, result.avg - result.stddev);
       var minSize = 40000 * scale;
@@ -227,7 +230,7 @@ require([
         stats.Confirmed_max,
         stats.Confirmed_avg + stats.Confirmed_stddev
       );
-      var maxSize = 1000000 * scale;
+      var maxSize = 600000 * scale;
 
       console.log("MIN", minValue);
       console.log("MAX", maxValue);
@@ -252,7 +255,7 @@ require([
             {
               type: "object",
               resource: {
-                primitive: "cylinder"
+                primitive: "tetrahedron"
               },
               material: {
                 color: confirmedColor
@@ -272,18 +275,18 @@ require([
             axis: "width-and-depth",
             useSymbolValue: true
           },
-          // {
-          //   type: "color",
-          //   field: "Confirmed",
-          //   stops: [{
-          //     value: -stats.Confirmed_max,
-          //     color: countryColor
-          //   },
-          //   {
-          //     value: stats.Confirmed_max,
-          //     color: confirmedColor
-          //   }]
-          // }
+          {
+            type: "color",
+            field: "Confirmed",
+            stops: [{
+              value: 0,
+              color: confirmedColor
+            },
+            {
+              value: stats.Confirmed_avg,
+              color: "#ffb730"
+            }]
+          }
         ]
       };
 
