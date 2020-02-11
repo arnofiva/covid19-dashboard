@@ -16,7 +16,8 @@ require([
 
   var confirmed = new FeatureLayer({
     url,
-    opacity: 1
+    opacity: 1,
+    outFields: ["*"],
   });
   var deaths = new FeatureLayer({
     url,
@@ -45,7 +46,7 @@ require([
             },
             outline: {
               color: "#3D4C57", //[0, 0, 0, 0.5],
-              size: "1.5pt",
+              size: "1pt",
             }
           }
         ]
@@ -57,7 +58,7 @@ require([
     url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0",
     elevationInfo: {
       mode: "relative-to-ground",
-      offset: -60000,
+      offset: -160000,
     },
     renderer: {
       type: "simple",
@@ -66,7 +67,7 @@ require([
         symbolLayers: [
           {
             type: "extrude",  // autocasts as new ExtrudeSymbol3DLayer()
-            size: 50000,  // 100,000 meters in height
+            size: 150000,  // 100,000 meters in height
             material: { color: "#9FA5AB" }, // [255, 255, 255, 0.5]
             // edges: {
             //   type: "solid", // autocasts as new SolidEdges3D()
@@ -137,7 +138,6 @@ require([
   var view = new SceneView({
     container: "viewDiv",
     map: map,
-    viewingMode: "global",
     // qualityProfile: "high",
     environment: {
       background: {
@@ -147,18 +147,22 @@ require([
       starsEnabled: false,
       atmosphereEnabled: false,
     },
+
+    viewingMode: "global",
     // camera: {"position":{"spatialReference":{"latestWkid":3857,"wkid":102100},"x":25894517.749131426,"y":-24024418.483365063,"z":21554673.166552052},"heading":316.98163600465756,"tilt":56.04624468206751},
+
+    // viewingMode: "local",
     // camera: {"position":{"spatialReference":{"latestWkid":3857,"wkid":102100},"x":25148433.234934397,"y":-11963402.146377262,"z":10427949.039143005},"heading":303.9286566604314,"tilt":66.07849294010876},
-    clippingArea: {
-      spatialReference: {
-        latestWkid: 3857,
-        wkid: 102100
-      },
-      xmin: -20037507.067161843,
-      ymin: -8245831.6271917485,
-      xmax: 20037507.067161843,
-      ymax: 18418386.309078343
-    }
+    // clippingArea: {
+    //   spatialReference: {
+    //     latestWkid: 3857,
+    //     wkid: 102100
+    //   },
+    //   xmin: -20037507.067161843,
+    //   ymin: -8245831.6271917485,
+    //   xmax: 20037507.067161843,
+    //   ymax: 18418386.309078343
+    // }
   });
 
   view.when().then(() => {
@@ -174,23 +178,31 @@ require([
     statisticType: "sum"
   };
 
-  var query = confirmed.createQuery();
-  var stats = [];
-  ["Confirmed", "Deaths", "Recovered"].forEach(field => {
-    ["sum", "avg", "stddev", "max"].forEach(op => {
-      stats.push({
-        onStatisticField: field,
-        outStatisticFieldName: `${field}_${op}`,
-        statisticType: op
+  function addOutStatistics(query) {
+    var stats = [];
+    ["Confirmed", "Deaths", "Recovered"].forEach(field => {
+      ["sum", "avg", "stddev", "max"].forEach(op => {
+        stats.push({
+          onStatisticField: field,
+          outStatisticFieldName: `${field}_${op}`,
+          statisticType: op
+        });
       });
     });
-  });
-  stats.push({
-    onStatisticField: "Last_Update",
-    outStatisticFieldName: "Last_Update_max",
-    statisticType: "max"
-  });
-  query.outStatistics = stats;
+    stats.push({
+      onStatisticField: "Last_Update",
+      outStatisticFieldName: "Last_Update_max",
+      statisticType: "max"
+    });
+    query.outStatistics = stats;
+  }
+
+  var query = confirmed.createQuery();
+  addOutStatistics(query);
+
+  var totalConfirmed = 0;
+  var totalDeaths = 0;
+  var totalRecovered = 0;
 
   confirmed
     .queryFeatures(query)
@@ -199,9 +211,10 @@ require([
 
       console.log("Stats", stats);
 
-      document.getElementById("dashboardConfirmed").innerText = stats.Confirmed_sum;
-      document.getElementById("dashboardDeaths").innerText = stats.Deaths_sum;
-      document.getElementById("dashboardRecovered").innerText = stats.Recovered_sum;
+      totalConfirmed = stats.Confirmed_sum;
+      totalDeaths = stats.Deaths_sum;
+      totalRecovered = stats.Recovered_sum;
+      removeHighlight();
 
       var scale = 5;
 
@@ -259,18 +272,18 @@ require([
             axis: "width-and-depth",
             useSymbolValue: true
           },
-          {
-            type: "color",
-            field: "Confirmed",
-            stops: [{
-              value: -stats.Confirmed_max,
-              color: countryColor
-            },
-            {
-              value: stats.Confirmed_max,
-              color: confirmedColor
-            }]
-          }
+          // {
+          //   type: "color",
+          //   field: "Confirmed",
+          //   stops: [{
+          //     value: -stats.Confirmed_max,
+          //     color: countryColor
+          //   },
+          //   {
+          //     value: stats.Confirmed_max,
+          //     color: confirmedColor
+          //   }]
+          // }
         ]
       };
 
@@ -292,6 +305,11 @@ require([
       confirmedHighlight.remove();
       confirmedHighlight = null;
     }
+    lastCountryId = null;
+
+    document.getElementById("dashboardConfirmed").innerText = totalConfirmed;
+    document.getElementById("dashboardDeaths").innerText = totalDeaths;
+    document.getElementById("dashboardRecovered").innerText = totalRecovered;
   }
 
   var queryStats = promiseUtils.debounce((mapPoint, countriesLV, confirmedLV) => {
@@ -305,17 +323,31 @@ require([
         if (objectId === lastCountryId) {
           return;
         }
+        removeHighlight();
         lastCountryId = objectId;
+
         var query = confirmedLV.createQuery();
         query.geometry = country.geometry;
 
-        removeHighlight();
         countryHighlight = countriesLV.highlight([country]);
 
-        return confirmedLV.queryFeatures(query).then(result => {
- 
-          confirmedHighlight = confirmedLV.highlight(result.features);
-        });
+        var statsQuery = query.clone();
+        addOutStatistics(statsQuery);
+
+        return promiseUtils.eachAlways([
+          confirmedLV.queryObjectIds(query).then(objectIds => {
+            confirmedHighlight = confirmedLV.highlight(objectIds);
+          }),
+          confirmedLV.queryFeatures(statsQuery).then(result => {
+            debugger;
+            var stats = result.features[0].attributes;
+            document.getElementById("dashboardConfirmed").innerText = stats.Confirmed_sum || 0;
+            document.getElementById("dashboardDeaths").innerText = stats.Deaths_sum || 0;
+            document.getElementById("dashboardRecovered").innerText = stats.Recovered_sum || 0;
+          })
+        ]).catch(console.error);
+      } else {
+        removeHighlight();
       }
     });
   });
