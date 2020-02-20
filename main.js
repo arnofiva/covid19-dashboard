@@ -12,16 +12,15 @@ require([
     countries: "#9FA5AB",
     countriesOutline: "#3D4C57",
 
-    confirmed: "#ffdd30",
-    confirmedLight: "#fff6cc",
+    confirmedLight: "#d5c058",// "#fff6cc",
+    confirmed: "#ffdc2e",
 
-    deaths: "#ff3a30",
-    deathsLight: "#ffcfcc",
+    deathsLight: "#cb6762",// "#ffcfcc",
+    deaths: "#ea4b43",
 
-    recovered: "#5adc4c",
-    recoveredLight: "#d8f7d4",
+    recoveredLight: "#6dcb62",// "#d8f7d4",
+    recovered: "#4fea3e",
   };
-
 
   var confirmed = new FeatureLayer({
     url,
@@ -116,15 +115,22 @@ require([
       starsEnabled: false,
       atmosphereEnabled: false,
     },
+    highlightOptions: {
+      color: "#FFFFFF",
+      fillOpacity: 0.7,
+      haloOpacity: 0,
+    },
+
 
     viewingMode: "global",
-    camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":118.21039651139894,"y":1.4455488670597776,"z":14469300.576021254},"heading":22.89726141350831,"tilt":3.431264364628225},
+    camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":131.86262861849988,"y":3.309571612356274,"z":20661501.503930703},"heading":15.36981324420197,"tilt":0.11792632041553405},
   });
 
   view.when().then(() => {
     view.popup.defaultPopupTemplateEnabled = false;
     view.popup.autoOpenEnabled = false;
 
+    view.constraints.altitude.min = view.constraints.altitude.max / 2;
     view.constraints.clipDistance.far *= 2;
   });
 
@@ -159,6 +165,8 @@ require([
 
   var ctx = document.getElementById('dashboardBarChart').getContext('2d');
   Chart.defaults.global.defaultColor = "white";
+  Chart.defaults.global.defaultFontColor = "white";
+  Chart.defaults.global.defaultFontFamily = "'Avenir Next W00','Helvetica Neue',Helvetica,Arial,sans-serif";
 
   var barChart = null;
 
@@ -380,12 +388,12 @@ require([
         query.geometry = country.geometry;
 
         var statsQuery = query.clone();
+        removeHighlight();
         addOutStatistics(statsQuery);
 
+        countryHighlight = countriesLV.highlight([country]);
         return confirmedLV.queryObjectIds(query).then(objectIds => {
-          removeHighlight();
-          countryHighlight = countriesLV.highlight([country]);
-          confirmedHighlight = confirmedLV.highlight(objectIds);
+          // confirmedHighlight = confirmedLV.highlight(objectIds);
           return confirmedLV.queryFeatures(statsQuery).then(result => {
             var stats = result.features[0].attributes;
             updateBarChart(country.getAttribute("Country"), stats.Confirmed_sum || 0, stats.Recovered_sum || 0, stats.Deaths_sum || 0);

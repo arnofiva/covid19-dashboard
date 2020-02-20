@@ -65,23 +65,24 @@ a:hover {
 }
 
 .confirmed-light {
-  color: #fff6cc;
+  color: hsl(50, 60%, 59%);
+  /* color: rgb(255, 246, 204); */
 }
 
 .deaths {
-  color: #ff382e;
+  color: hsl(3, 80%, 59%);
 }
 
 .deaths-light {
-  color: #ffcfcc;
+  color: hsl(3, 50%, 59%);
 }
 
 .recovered {
-  color: #5adc4c;
+  color: hsl(114, 80%, 58%);
 }
 
 .recovered-light {
-  color: #d8f7d4;
+  color: hsl(114, 50%, 59%);
 }
 
 .dashboard-number {
