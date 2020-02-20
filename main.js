@@ -81,17 +81,12 @@ require([
     renderer: {
       type: "simple",
       symbol: {
-        type: "polygon-3d",  // autocasts as new PolygonSymbol3D()
+        type: "polygon-3d",
         symbolLayers: [
           {
-            type: "extrude",  // autocasts as new ExtrudeSymbol3DLayer()
-            size: 75000,  // 100,000 meters in height
-            material: { color: colors.countries }, // [255, 255, 255, 0.5]
-            // edges: {
-            //   type: "solid", // autocasts as new SolidEdges3D()
-            //   // color: "#3D4C57",
-            //   size: "2px",
-            // },
+            type: "extrude",
+            size: 75000,
+            material: { color: colors.countries },
           }
         ]
       },
@@ -129,7 +124,9 @@ require([
   });
 
   view.when().then(() => {
-    view.popup.defaultPopupTemplateEnabled = true;
+    view.popup.defaultPopupTemplateEnabled = false;
+    view.popup.autoOpenEnabled = false;
+
     view.constraints.clipDistance.far *= 2;
   });
 
@@ -196,18 +193,11 @@ require([
 
     var width = 30000 * scale;
 
-    var minValue = 0; //Math.max(result.min, result.avg - result.stddev);
+    var minValue = 0;
     var minSize = 20000 * scale;
 
-    // var maxValue = Math.min(
-    //   stats.Confirmed_max,
-    //   stats.Confirmed_avg + stats.Confirmed_stddev
-    // );
     var maxValue = stats.Confirmed_max / 3;
     var maxSize = 600000 * scale;
-
-    console.log("MIN", minValue);
-    console.log("MAX", maxValue);
 
     confirmed.elevationInfo = {
       mode: "relative-to-ground",
@@ -281,17 +271,12 @@ require([
         field = "Confirmed";
     }
     updateRenderer(field);
-    console.log("Hover bar", actions);
   }
 
   confirmed
     .queryFeatures(query)
     .then(result => {
       stats = result.features[0].attributes;
-
-      console.log("Stats", stats);
-
-
 
       totalConfirmed = stats.Confirmed_sum;
       totalDeaths = stats.Deaths_sum;
@@ -440,8 +425,6 @@ require([
       "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/cases_time_v3/FeatureServer/0"
   });
   cases.queryFeatures().then(result => {
-    console.log("Cases", result);
-
     var labels = result.features.map(f =>
       moment(new Date(f.getAttribute("Report_Date"))).format("MMM Do")
     );
