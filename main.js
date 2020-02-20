@@ -10,30 +10,30 @@ require([
   var url =
     "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/ncov_cases/FeatureServer/1";
 
-  var confirmedColor = "#ffdd30"; // "#E3C835"
-  var countryColor = "#9FA5AB";
-  var deathsColor = [255, 58, 48];
+  var colors = {
+    countries: "#9FA5AB",
+    countriesOutline: "#3D4C57",
+
+    confirmed: "#ffdd30",
+    confirmedLight: "#fff6cc",
+
+    deaths: "#ff3a30",
+    deathsLight: "#ffcfcc",
+
+    recovered: "#5adc4c",
+    recoveredLight: "#d8f7d4",
+  };
+
 
   var confirmed = new FeatureLayer({
     url,
     opacity: 1,
     outFields: ["*"],
   });
-  var deaths = new FeatureLayer({
-    url,
-    opacity: 1,
-    definitionExpression: "Deaths > 0",
-    popupEnabled: false
-  });
-  var recovered = new FeatureLayer({
-    url,
-    opacity: 1,
-    definitionExpression: "Recovered > 0",
-    popupEnabled: false
-  });
 
   var worldCountries = new FeatureLayer({
     url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0",
+    outFields: ["*"],
     renderer: {
       type: "simple",
       symbol: {
@@ -42,10 +42,10 @@ require([
           {
             type: "fill",
             material: {
-              color: "#9FA5AB",
+              color: colors.countries,
             },
             outline: {
-              color: "#3D4C57", //[0, 0, 0, 0.5],
+              color: colors.countriesOutline,
               size: "1pt",
             }
           }
@@ -54,11 +54,29 @@ require([
     }
   });
 
+  const graticule = new FeatureLayer({
+    url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/World_graticule_15deg/FeatureServer",
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "line-3d",
+        symbolLayers: [{
+          type: "line",
+          material: {
+            color: colors.countries
+          },
+          size: "1pt",
+        }]
+      }
+    },
+    opacity: 1
+  });
+
   var worldCountriesExtruded = new FeatureLayer({
     url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0",
     elevationInfo: {
       mode: "relative-to-ground",
-      offset: -160000,
+      offset: -80000,
     },
     renderer: {
       type: "simple",
@@ -67,8 +85,8 @@ require([
         symbolLayers: [
           {
             type: "extrude",  // autocasts as new ExtrudeSymbol3DLayer()
-            size: 150000,  // 100,000 meters in height
-            material: { color: "#9FA5AB" }, // [255, 255, 255, 0.5]
+            size: 75000,  // 100,000 meters in height
+            material: { color: colors.countries }, // [255, 255, 255, 0.5]
             // edges: {
             //   type: "solid", // autocasts as new SolidEdges3D()
             //   // color: "#3D4C57",
@@ -80,57 +98,11 @@ require([
     }
   });
 
-  var countries = new FeatureLayer({
-    url:
-      "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World__Countries_Generalized_analysis_trim/FeatureServer",
-    definitionExpression: "ISO_2DIGIT NOT IN ('US', 'CA', 'CN', 'AU')",
-    renderer: {
-      type: "simple",
-      symbol: {
-        type: "polygon-3d", // autocasts as new PolygonSymbol3D()
-        symbolLayers: [
-          {
-            type: "fill", // autocasts as new FillSymbol3DLayer()
-            material: { color: [0, 0, 0, 0] },
-            outline: {
-              color: [255, 255, 255, 0.6],
-              size: "1.5px"
-            }
-          }
-        ]
-      }
-    }
-  });
-
-  var devisions = new FeatureLayer({
-    url:
-      "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Administrative_Divisions/FeatureServer",
-    definitionExpression: "ISO_CC in ('CN', 'CA', 'US', 'AU')",
-    renderer: {
-      type: "simple",
-      symbol: {
-        type: "polygon-3d", // autocasts as new PolygonSymbol3D()
-        symbolLayers: [
-          {
-            type: "fill", // autocasts as new FillSymbol3DLayer()
-            material: { color: [0, 0, 0, 0] },
-            outline: {
-              color: [255, 255, 255, 0.6],
-              size: "1px"
-            }
-          }
-        ]
-      }
-    },
-    minScale: null,
-    maxScale: null
-  });
-
   var map = new Map({
-    layers: [confirmed, worldCountries],
+    layers: [confirmed, graticule, worldCountries, worldCountriesExtruded],
     ground: {
-      opacity: 1,
-      surfaceColor: "#3D4C57",
+      opacity: 0,
+      surfaceColor: colors.countriesOutline,
     }
   });
 
@@ -140,40 +112,27 @@ require([
     map: map,
     // qualityProfile: "high",
     padding: {
-      right: 300,
+      top: 80,
+      right: 360,
     },
     environment: {
       background: {
         type: "color",
-        color: "#3D4C57"
+        color: colors.countriesOutline
       },
       starsEnabled: false,
       atmosphereEnabled: false,
     },
 
     viewingMode: "global",
-    // camera: {"position":{"spatialReference":{"latestWkid":3857,"wkid":102100},"x":25894517.749131426,"y":-24024418.483365063,"z":21554673.166552052},"heading":316.98163600465756,"tilt":56.04624468206751},
-
-    // viewingMode: "local",
-    // camera: {"position":{"spatialReference":{"latestWkid":3857,"wkid":102100},"x":25148433.234934397,"y":-11963402.146377262,"z":10427949.039143005},"heading":303.9286566604314,"tilt":66.07849294010876},
-    // clippingArea: {
-    //   spatialReference: {
-    //     latestWkid: 3857,
-    //     wkid: 102100
-    //   },
-    //   xmin: -20037507.067161843,
-    //   ymin: -8245831.6271917485,
-    //   xmax: 20037507.067161843,
-    //   ymax: 18418386.309078343
-    // }
+    camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":118.21039651139894,"y":1.4455488670597776,"z":14469300.576021254},"heading":22.89726141350831,"tilt":3.431264364628225},
   });
 
   view.when().then(() => {
     view.popup.defaultPopupTemplateEnabled = true;
     view.constraints.clipDistance.far *= 2;
   });
-  
-  
+
 
   var sumPopulation = {
     onStatisticField: "Confirmed",
@@ -203,93 +162,200 @@ require([
   var query = confirmed.createQuery();
   addOutStatistics(query);
 
+  var ctx = document.getElementById('dashboardBarChart').getContext('2d');
+  Chart.defaults.global.defaultColor = "white";
+
+  var barChart = null;
+
+  var stats;
   var totalConfirmed = 0;
   var totalDeaths = 0;
   var totalRecovered = 0;
 
+  function updateBarChart(title, confirmed, recovered, deaths) {
+    document.getElementById("dashboardConfirmed").innerText = confirmed || 0;
+    document.getElementById("dashboardRecovered").innerText = recovered || 0;
+    document.getElementById("dashboardDeaths").innerText = deaths || 0;
+    document.getElementById("dashboardRegion").innerText = title;
+
+    barChart.data.datasets[0].data[0] = confirmed || 0;
+    barChart.data.datasets[0].data[1] = recovered || 0;
+    barChart.data.datasets[0].data[2] = deaths || 0;
+    barChart.update();
+  }
+
+  var lastField;
+  function updateRenderer(field) {
+
+    if (field === lastField) {
+      return;
+    }
+    lastField = field;
+
+    var scale = 5;
+
+    var width = 30000 * scale;
+
+    var minValue = 0; //Math.max(result.min, result.avg - result.stddev);
+    var minSize = 20000 * scale;
+
+    // var maxValue = Math.min(
+    //   stats.Confirmed_max,
+    //   stats.Confirmed_avg + stats.Confirmed_stddev
+    // );
+    var maxValue = stats.Confirmed_max / 3;
+    var maxSize = 600000 * scale;
+
+    console.log("MIN", minValue);
+    console.log("MAX", maxValue);
+
+    confirmed.elevationInfo = {
+      mode: "relative-to-ground",
+    };
+
+    var renderer = {
+      type: "simple",
+      symbol: {
+        type: "point-3d",
+        symbolLayers: [
+          {
+            type: "object",
+            resource: {
+              primitive: "cylinder"
+            },
+            material: {
+              color: "#000000"
+            },
+            width: width // * 0.60
+          }
+        ]
+      },
+      visualVariables: [
+        {
+          type: "size",
+          field,
+          axis: "height",
+          stops: [{
+            value: 0,
+            size: minSize
+          },{
+            value: maxValue,
+            size: maxSize,
+          }]
+        },
+        {
+          type: "size",
+          axis: "width-and-depth",
+          useSymbolValue: true
+        },
+        {
+          type: "color",
+          field,
+          stops: [{
+            value: 0,
+            color: [0, 0, 0, 0]
+          },{
+            value: 1,
+            color: colors[`${field.toLowerCase()}Light`]
+          },
+          {
+            value: stats[`${field}_avg`],
+            color: colors[field.toLowerCase()]
+          }]
+        }
+      ]
+    };
+    confirmed.renderer = renderer;
+  }
+
+  function onHover(_, actions) {
+    var field = "Confirmed";
+    switch(actions.length && actions[0]._index) {
+      case 1:
+        field = "Recovered";
+        break;
+      case 2:
+        field = "Deaths";
+        break;
+      default:
+        field = "Confirmed";
+    }
+    updateRenderer(field);
+    console.log("Hover bar", actions);
+  }
+
   confirmed
     .queryFeatures(query)
     .then(result => {
-      var stats = result.features[0].attributes;
+      stats = result.features[0].attributes;
 
       console.log("Stats", stats);
+
+
 
       totalConfirmed = stats.Confirmed_sum;
       totalDeaths = stats.Deaths_sum;
       totalRecovered = stats.Recovered_sum;
-      removeHighlight();
 
-      var scale = 5;
+      barChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Confirmed", "Recovered", "Deaths"],
+          datasets: [{
+            backgroundColor: [colors.confirmed, colors.recovered, colors.deaths],
 
-      var width = 60000 * scale;
-
-      var minValue = 0; //Math.max(result.min, result.avg - result.stddev);
-      var minSize = 40000 * scale;
-
-      var maxValue = Math.min(
-        stats.Confirmed_max,
-        stats.Confirmed_avg + stats.Confirmed_stddev
-      );
-      var maxSize = 600000 * scale;
-
-      console.log("MIN", minValue);
-      console.log("MAX", maxValue);
-
-      var confirmedHeight = `${minSize} + ((Min(${maxValue},$feature.Confirmed) - ${minValue})/(${maxValue} - ${minValue}))*(${maxSize} - ${minSize})`;
-
-      var deathHeight = `($feature.Deaths/$feature.Confirmed)*(${confirmedHeight})`;
-      var deathElevation = `IIf(0 < $feature.Deaths, ${deathHeight} + ${minSize}/10, 0)`;
-
-      var recoveredHeight = `($feature.Recovered/$feature.Confirmed)*(${confirmedHeight})`;
-      var recoveredElevation = `IIf(0 < $feature.Recovered, ${recoveredHeight} + ${minSize}/10, 0)`;
-
-      confirmed.elevationInfo = {
-        mode: "relative-to-ground",
-      };
-
-      confirmed.renderer = {
-        type: "simple",
-        symbol: {
-          type: "point-3d",
-          symbolLayers: [
-            {
-              type: "object",
-              resource: {
-                primitive: "tetrahedron"
-              },
-              material: {
-                color: confirmedColor
-              },
-              width: width // * 0.60
-            }
-          ]
+            barThickness: 6,
+            maxBarThickness: 8,
+            minBarLength: 100,
+            data: [1, 2, 3]
+          }]
         },
-        visualVariables: [
-          {
-            type: "size",
-            valueExpression: confirmedHeight,
-            axis: "height"
+        options: {
+          layout: {
+            padding: {
+              left: -20,
+              right: 0,
+              top: 0,
+              bottom: 0
+            }
           },
-          {
-            type: "size",
-            axis: "width-and-depth",
-            useSymbolValue: true
+          tooltips: {
+              enabled: false
           },
-          {
-            type: "color",
-            field: "Confirmed",
-            stops: [{
-              value: 0,
-              color: confirmedColor
-            },
-            {
-              value: stats.Confirmed_avg,
-              color: "#ffb730"
-            }]
-          }
-        ]
-      };
+          legend: {
+            display: false
+          },
+          // aspectRatio: 1,
+          scales: {
+            yAxes: [{
+              ticks: {
+                min: 0,
+                max: totalConfirmed,
+                display: false,
+              },
+              gridLines: {
+                drawBorder: false,
+                display: false,
+              },
+            }],
+            xAxes: [{
+              ticks: {
+                beginAtZero: true,
+                fontColor: "white",
+                display: false,
+              },
+              gridLines: {
+                drawBorder: false,
+                display: false,
+              },
+            }],
+          },
+          onHover
+        },
+      });
 
+      removeHighlight();
+      updateRenderer("Confirmed");
       enableQueries();
     })
     .catch(console.error);
@@ -308,17 +374,15 @@ require([
       confirmedHighlight.remove();
       confirmedHighlight = null;
     }
-    lastCountryId = null;
 
-    document.getElementById("dashboardConfirmed").innerText = totalConfirmed;
-    document.getElementById("dashboardDeaths").innerText = totalDeaths;
-    document.getElementById("dashboardRecovered").innerText = totalRecovered;
+    updateBarChart("Worldwide", totalConfirmed, totalRecovered, totalDeaths);
   }
 
   var queryStats = promiseUtils.debounce((mapPoint, countriesLV, confirmedLV) => {
     var query = countriesLV.createQuery();
     query.geometry = mapPoint;
     query.returnGeometry = true;
+    query.outFields = ["*"];
     return countriesLV.queryFeatures(query).then(result => {
       if (result.features.length) {
         var country = result.features[0];
@@ -326,30 +390,26 @@ require([
         if (objectId === lastCountryId) {
           return;
         }
-        removeHighlight();
+
         lastCountryId = objectId;
 
         var query = confirmedLV.createQuery();
         query.geometry = country.geometry;
 
-        countryHighlight = countriesLV.highlight([country]);
-
         var statsQuery = query.clone();
         addOutStatistics(statsQuery);
 
-        return promiseUtils.eachAlways([
-          confirmedLV.queryObjectIds(query).then(objectIds => {
-            confirmedHighlight = confirmedLV.highlight(objectIds);
-          }),
-          confirmedLV.queryFeatures(statsQuery).then(result => {
-            debugger;
+        return confirmedLV.queryObjectIds(query).then(objectIds => {
+          removeHighlight();
+          countryHighlight = countriesLV.highlight([country]);
+          confirmedHighlight = confirmedLV.highlight(objectIds);
+          return confirmedLV.queryFeatures(statsQuery).then(result => {
             var stats = result.features[0].attributes;
-            document.getElementById("dashboardConfirmed").innerText = stats.Confirmed_sum || 0;
-            document.getElementById("dashboardDeaths").innerText = stats.Deaths_sum || 0;
-            document.getElementById("dashboardRecovered").innerText = stats.Recovered_sum || 0;
+            updateBarChart(country.getAttribute("Country"), stats.Confirmed_sum || 0, stats.Recovered_sum || 0, stats.Deaths_sum || 0);
           })
-        ]).catch(console.error);
+        });
       } else {
+        lastCountryId = null;
         removeHighlight();
       }
     });
@@ -377,7 +437,7 @@ require([
 
   var cases = new FeatureLayer({
     url:
-      "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/cases_time/FeatureServer/0"
+      "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/cases_time_v3/FeatureServer/0"
   });
   cases.queryFeatures().then(result => {
     console.log("Cases", result);
@@ -385,10 +445,12 @@ require([
     var labels = result.features.map(f =>
       moment(new Date(f.getAttribute("Report_Date"))).format("MMM Do")
     );
-    var data = result.features.map(f => f.getAttribute("Total_Confirmed"));
 
-    var ctx = document.getElementById('dashboardLinechart').getContext('2d');
-    Chart.defaults.global.defaultColor = "white";
+
+    var confirmedData = result.features.map(f => f.getAttribute("Total_Confirmed"));
+    var recoveredData = result.features.map(f => f.getAttribute("Total_Recovered"));
+
+    var ctx = document.getElementById('dashboardLineChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -396,9 +458,15 @@ require([
             datasets: [{
               fill: false,
                 label: 'Confirmed',
-                backgroundColor: confirmedColor,
-                borderColor: confirmedColor,
-                data,
+                backgroundColor: colors.confirmed,
+                borderColor: colors.confirmed,
+                data: confirmedData,
+            }, {
+              fill: false,
+                label: 'Recovered',
+                backgroundColor: colors.recovered,
+                borderColor: colors.recovered,
+                data: recoveredData,
             }]
         },
         options: {
@@ -408,28 +476,21 @@ require([
           legend: {
             display: false
           },
-          aspectRatio: 1,
-          title: {
-            display: true,
-            text: "Confirmed",
-            fontColor: "white",
-            fontFamily: "'Avenir Next W00','Helvetica Neue',Helvetica,Arial,sans-serif",
-            fontSize: 16
-          },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true,
-                        fontColor: "white",
-                    }
-                }],
-                xAxes: [{
+          // aspectRatio: 1,
+          scales: {
+              yAxes: [{
                   ticks: {
                       beginAtZero: true,
                       fontColor: "white",
                   }
-              }]
-            }
+              }],
+              xAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    fontColor: "white",
+                }
+            }]
+          }
         }
     });
   });

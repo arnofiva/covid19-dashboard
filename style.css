@@ -5,12 +5,19 @@ body,
   margin: 0;
   height: 100%;
   width: 100%;
+  color: white;
   background: #3D4C57;
   font-family: "Avenir Next W00","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 #viewDiv {
-  /* width: calc(100% - 200px); */
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.esri-ui {
+  bottom: 0px !important;
 }
 
 section {
@@ -18,43 +25,92 @@ section {
   right: 0;
   top: 0;
   bottom: 0;
-  color: white;
   text-align: center;
-  padding: 0.1em 2em;
-  background-color: rgba(61, 76, 87, 0.2);
+  padding: 30px 30px;
+  background-color: rgba(61, 76, 87, 0.85);
   max-width: 300px;
 }
 
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 15px;
+}
+
 a {
-  color: white;
+  color: #9FA5AB;
+
   text-decoration: none;
-  border-bottom: 1px dashed white;
+}
+
+a:visited {
+  color: #9FA5AB;
+}
+
+a:hover {
+  color: white;
+  text-decoration: underline;
 }
 
 .dashboard-component {
   width: 100px;
-  height: 100px;
+  /* height: 100px; */
   float: left;
 }
 
-#dashboardConfirmed {
-  color: #ffdd30;
+.confirmed {
+  color: hsl(50, 100%, 59%);
+  /* background-color: #fff6cc; */
 }
 
-#dashboardDeaths {
-  color: #ff3a30;
+.confirmed-light {
+  color: #fff6cc;
 }
 
-#dashboardRecovered {
-  color: #83E478;
+.deaths {
+  color: #ff382e;
+}
+
+.deaths-light {
+  color: #ffcfcc;
+}
+
+.recovered {
+  color: #5adc4c;
+}
+
+.recovered-light {
+  color: #d8f7d4;
 }
 
 .dashboard-number {
   font-size: 1.5em;
 }
 
-.extra{
+.dashboard-attribution {
+  position: absolute;
+  bottom: 0;
+  left: 0px;
+  width: 100%;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.65);
+}
+
+.dashboard-credits {
+  position: absolute;
+  bottom: 20px;
+  width: 80%;
   font-size: 0.8em;
+}
+
+/* .extra{
+  font-size: 0.8em;
+} */
+
+#dashboardRegion {
+  font-size: 1.3em;
+  margin-bottom: 20px;
 }
 
 #dashboard-scatterchart {
@@ -63,4 +119,8 @@ a {
 
 #dashboardLinechart {
   height: 500px;
+}
+
+#dashboardLineChart {
+  margin-top: 100px;
 }
