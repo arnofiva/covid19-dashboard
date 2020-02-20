@@ -1,6 +1,6 @@
-# 3D Corona Virus Map
+# 3D COVID-19 Dashboard
 
-Dashboard showing the Corona virus spread on a globe. Prototype was built with the [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/).
+Dashboard showing the COVID-19 spread on a 3D globe. Prototype was built with the [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/).
 
 [![3D Corona Dashboard](screenshot.png)](https://arnofiva.github.io/corona-virus-dashboard/)
 

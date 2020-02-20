@@ -1,12 +1,10 @@
 require([
   "esri/Map",
   "esri/views/SceneView",
-  "esri/layers/TileLayer",
   "esri/layers/FeatureLayer",
-  "esri/renderers/smartMapping/statistics/summaryStatistics",
   "esri/core/promiseUtils",
   "esri/core/watchUtils"
-], function(Map, SceneView, TileLayer, FeatureLayer, statistics, promiseUtils, watchUtils) {
+], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils) {
   var url =
     "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/ncov_cases/FeatureServer/1";
 
