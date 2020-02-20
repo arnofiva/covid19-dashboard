@@ -2,6 +2,8 @@
 
 Dashboard showing the Corona virus spread on a globe. Prototype was built with the [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/).
 
+[![3D Corona Dashboard](screenshot.png)](https://arnofiva.github.io/corona-virus-dashboard/)
+
 Data sources
 [WHO](https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports),
 [CDC](https://www.cdc.gov/coronavirus/2019-ncov/index.html),
