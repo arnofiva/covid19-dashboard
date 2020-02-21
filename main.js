@@ -3,8 +3,9 @@ require([
   "esri/views/SceneView",
   "esri/layers/FeatureLayer",
   "esri/core/promiseUtils",
-  "esri/core/watchUtils"
-], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils) {
+  "esri/core/watchUtils",
+  "esri/Graphic"
+], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils, Graphic) {
   var url =
     "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/ncov_cases/FeatureServer/1";
 
@@ -115,12 +116,6 @@ require([
       starsEnabled: false,
       atmosphereEnabled: false,
     },
-    highlightOptions: {
-      color: "#FFFFFF",
-      fillOpacity: 0.7,
-      haloOpacity: 0,
-    },
-
 
     viewingMode: "global",
     camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":131.86262861849988,"y":3.309571612356274,"z":20661501.503930703},"heading":15.36981324420197,"tilt":0.11792632041553405},
@@ -133,13 +128,6 @@ require([
     view.constraints.altitude.min = view.constraints.altitude.max / 2;
     view.constraints.clipDistance.far *= 2;
   });
-
-
-  var sumPopulation = {
-    onStatisticField: "Confirmed",
-    outStatisticFieldName: "ConfirmedSum",
-    statisticType: "sum"
-  };
 
   function addOutStatistics(query) {
     var stats = [];
@@ -345,28 +333,16 @@ require([
         },
       });
 
-      removeHighlight();
+      removeCountrySelection();
       updateRenderer("Confirmed");
       enableQueries();
     })
     .catch(console.error);
 
   var lastCountryId = null;
-  var countryHighlight = null;
-
-  var confirmedHighlight = null;
-
-  function removeHighlight() {
-    if (countryHighlight) {
-      countryHighlight.remove();
-      countryHighlight = null;
-    }
-    if (confirmedHighlight) {
-      confirmedHighlight.remove();
-      confirmedHighlight = null;
-    }
-
+  function removeCountrySelection() {
     updateBarChart("Worldwide", totalConfirmed, totalRecovered, totalDeaths);
+    view.graphics.removeAll();
   }
 
   var queryStats = promiseUtils.debounce((mapPoint, countriesLV, confirmedLV) => {
@@ -388,10 +364,22 @@ require([
         query.geometry = country.geometry;
 
         var statsQuery = query.clone();
-        removeHighlight();
+        removeCountrySelection();
         addOutStatistics(statsQuery);
 
-        countryHighlight = countriesLV.highlight([country]);
+        // countryHighlight = countriesLV.highlight([country]);
+        view.graphics.add(new Graphic({
+          geometry: country.geometry.clone(),
+          symbol: {
+            type: "polygon-3d",  // autocasts as new PolygonSymbol3D()
+            symbolLayers: [{
+              type: "fill",  // autocasts as new FillSymbol3DLayer()
+              material: { color: [255, 255, 255, 0.7] }
+            }]
+          }
+        }));
+
+
         return confirmedLV.queryObjectIds(query).then(objectIds => {
           // confirmedHighlight = confirmedLV.highlight(objectIds);
           return confirmedLV.queryFeatures(statsQuery).then(result => {
@@ -401,7 +389,7 @@ require([
         });
       } else {
         lastCountryId = null;
-        removeHighlight();
+        removeCountrySelection();
       }
     });
   });
@@ -420,7 +408,7 @@ require([
         if (mapPoint) {
           queryStats(mapPoint, layerViews[0], layerViews[1]);
         } else {
-          removeHighlight();
+          removeCountrySelection();
         }
       });
     });
