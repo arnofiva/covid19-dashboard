@@ -10,6 +10,7 @@ body,
   font-family: "Avenir Next W00","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+
 #viewDiv {
   position: absolute;
   top: 0px;
@@ -60,29 +61,29 @@ a:hover {
 }
 
 .confirmed {
-  color: hsl(50, 100%, 59%);
+  color: #ffdc2e;
   /* background-color: #fff6cc; */
 }
 
 .confirmed-light {
-  color: hsl(50, 60%, 59%);
+  color: #d5c058;
   /* color: rgb(255, 246, 204); */
 }
 
 .deaths {
-  color: hsl(3, 80%, 59%);
+  color: #ea4b43;
 }
 
 .deaths-light {
-  color: hsl(3, 50%, 59%);
+  color: #cb6762;
 }
 
 .recovered {
-  color: hsl(114, 80%, 58%);
+  color: #4fea3e;
 }
 
 .recovered-light {
-  color: hsl(114, 50%, 59%);
+  color: #6dcb62;
 }
 
 .dashboard-number {

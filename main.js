@@ -4,12 +4,12 @@ require([
   "esri/layers/FeatureLayer",
   "esri/core/promiseUtils",
   "esri/core/watchUtils",
-  "esri/Graphic"
-], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils, Graphic) {
+], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils) {
   var url =
     "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/ncov_cases/FeatureServer/1";
 
   var colors = {
+
     countries: "#9FA5AB",
     countriesOutline: "#3D4C57",
 
@@ -27,10 +27,31 @@ require([
     url,
     opacity: 1,
     outFields: ["*"],
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "point-3d",
+        symbolLayers: [
+          {
+            type: "object",
+            anchor: "bottom",
+            resource: {
+              primitive: "cube"
+            },
+            material: {
+              color: "#000000"
+            },
+            width: 150000
+          }
+        ]
+      }
+    }
   });
 
+  const countriesUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0";
+
   var worldCountries = new FeatureLayer({
-    url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0",
+    url: countriesUrl,
     outFields: ["*"],
     renderer: {
       type: "simple",
@@ -71,7 +92,7 @@ require([
   });
 
   var worldCountriesExtruded = new FeatureLayer({
-    url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0",
+    url: countriesUrl,
     elevationInfo: {
       mode: "relative-to-ground",
       offset: -80000,
@@ -116,6 +137,11 @@ require([
       starsEnabled: false,
       atmosphereEnabled: false,
     },
+    highlightOptions: {
+      haloOpacity: 0,
+      color: "white",
+      fillOpacity: 0.7,
+    },
 
     viewingMode: "global",
     camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":131.86262861849988,"y":3.309571612356274,"z":20661501.503930703},"heading":15.36981324420197,"tilt":0.11792632041553405},
@@ -128,6 +154,7 @@ require([
     view.constraints.altitude.min = view.constraints.altitude.max / 2;
     view.constraints.clipDistance.far *= 2;
   });
+  view.ui.empty("top-left");
 
   function addOutStatistics(query) {
     var stats = [];
@@ -151,7 +178,6 @@ require([
   var query = confirmed.createQuery();
   addOutStatistics(query);
 
-  var ctx = document.getElementById('dashboardBarChart').getContext('2d');
   Chart.defaults.global.defaultColor = "white";
   Chart.defaults.global.defaultFontColor = "white";
   Chart.defaults.global.defaultFontFamily = "'Avenir Next W00','Helvetica Neue',Helvetica,Arial,sans-serif";
@@ -172,6 +198,11 @@ require([
     barChart.data.datasets[0].data[0] = confirmed || 0;
     barChart.data.datasets[0].data[1] = recovered || 0;
     barChart.data.datasets[0].data[2] = deaths || 0;
+
+    barChart.data.datasets[1].data[0] = totalConfirmed - (confirmed || 0);
+    barChart.data.datasets[1].data[1] = totalConfirmed - (recovered || 0);
+    barChart.data.datasets[1].data[2] = totalConfirmed - (deaths || 0);
+
     barChart.update();
   }
 
@@ -183,86 +214,67 @@ require([
     }
     lastField = field;
 
-    var scale = 5;
-
-    var width = 30000 * scale;
-
     var minValue = 0;
-    var minSize = 20000 * scale;
+    var minSize = 100000;
 
     var maxValue = stats.Confirmed_max / 3;
-    var maxSize = 600000 * scale;
+    var maxSize = 3000000;
 
-    confirmed.elevationInfo = {
-      mode: "relative-to-ground",
-    };
 
-    var renderer = {
-      type: "simple",
-      symbol: {
-        type: "point-3d",
-        symbolLayers: [
-          {
-            type: "object",
-            resource: {
-              primitive: "cylinder"
-            },
-            material: {
-              color: "#000000"
-            },
-            width: width // * 0.60
-          }
-        ]
+    var renderer = confirmed.renderer.clone();
+    renderer.visualVariables = [
+      {
+        type: "size",
+        field,
+        axis: "height",
+        stops: [{
+          value: 0,
+          size: minSize
+        },{
+          value: maxValue,
+          size: maxSize,
+        }]
       },
-      visualVariables: [
-        {
-          type: "size",
-          field,
-          axis: "height",
-          stops: [{
-            value: 0,
-            size: minSize
-          },{
-            value: maxValue,
-            size: maxSize,
-          }]
+      {
+        type: "size",
+        axis: "width-and-depth",
+        useSymbolValue: true
+      },
+      {
+        type: "color",
+        field,
+        stops: [{
+          value: 0,
+          color: [0, 0, 0, 0]
+        },{
+          value: 1,
+          color: colors[`${field.toLowerCase()}Light`]
         },
         {
-          type: "size",
-          axis: "width-and-depth",
-          useSymbolValue: true
-        },
-        {
-          type: "color",
-          field,
-          stops: [{
-            value: 0,
-            color: [0, 0, 0, 0]
-          },{
-            value: 1,
-            color: colors[`${field.toLowerCase()}Light`]
-          },
-          {
-            value: stats[`${field}_avg`],
-            color: colors[field.toLowerCase()]
-          }]
-        }
-      ]
-    };
+          value: stats[`${field}_avg`],
+          color: colors[field.toLowerCase()]
+        }]
+      }
+    ];
     confirmed.renderer = renderer;
   }
 
   function onHover(_, actions) {
     var field = "Confirmed";
-    switch(actions.length && actions[0]._index) {
-      case 1:
-        field = "Recovered";
-        break;
-      case 2:
-        field = "Deaths";
-        break;
-      default:
-        field = "Confirmed";
+    if (actions.length) {
+      document.body.style.cursor = "pointer";
+      switch(actions[0]._index) {
+        case 1:
+          field = "Recovered";
+          break;
+        case 2:
+          field = "Deaths";
+          break;
+        default:
+          field = "Confirmed";
+      }
+    } else {
+      document.body.style.cursor = "";
     }
     updateRenderer(field);
   }
@@ -276,16 +288,38 @@ require([
       totalDeaths = stats.Deaths_sum;
       totalRecovered = stats.Recovered_sum;
 
+      var ctx = document.getElementById('dashboardBarChart').getContext('2d');
+      var backgroundColor = [
+        colors.confirmed,
+        colors.recovered,
+        colors.deaths
+      ].map(color => {
+        var gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(1, colors.countriesOutline);
+        return gradient;
+      });
+
       barChart = new Chart(ctx, {
         type: "bar",
         data: {
           labels: ["Confirmed", "Recovered", "Deaths"],
           datasets: [{
-            backgroundColor: [colors.confirmed, colors.recovered, colors.deaths],
+            backgroundColor,
 
             barThickness: 6,
             maxBarThickness: 8,
             minBarLength: 100,
+            borderWidth: 0,
+            data: [1, 2, 3]
+          }, {
+            backgroundColor: [colors.countriesOutline, colors.countriesOutline, colors.countriesOutline],
+            hoverBackgroundColor: [colors.countriesOutline, colors.countriesOutline, colors.countriesOutline],
+
+            barThickness: 6,
+            maxBarThickness: 8,
+            minBarLength: 100,
+            borderWidth: 0,
             data: [1, 2, 3]
           }]
         },
@@ -307,6 +341,7 @@ require([
           // aspectRatio: 1,
           scales: {
             yAxes: [{
+              stacked: true,
               ticks: {
                 min: 0,
                 max: totalConfirmed,
@@ -318,6 +353,7 @@ require([
               },
             }],
             xAxes: [{
+              stacked: true,
               ticks: {
                 beginAtZero: true,
                 fontColor: "white",
@@ -339,10 +375,13 @@ require([
     })
     .catch(console.error);
 
+  var countryHighlight;
   var lastCountryId = null;
   function removeCountrySelection() {
     updateBarChart("Worldwide", totalConfirmed, totalRecovered, totalDeaths);
-    view.graphics.removeAll();
+    if (countryHighlight) {
+      countryHighlight.remove();
+    }
   }
 
   var queryStats = promiseUtils.debounce((mapPoint, countriesLV, confirmedLV) => {
@@ -364,21 +403,10 @@ require([
         query.geometry = country.geometry;
 
         var statsQuery = query.clone();
-        removeCountrySelection();
         addOutStatistics(statsQuery);
 
-        // countryHighlight = countriesLV.highlight([country]);
-        view.graphics.add(new Graphic({
-          geometry: country.geometry.clone(),
-          symbol: {
-            type: "polygon-3d",  // autocasts as new PolygonSymbol3D()
-            symbolLayers: [{
-              type: "fill",  // autocasts as new FillSymbol3DLayer()
-              material: { color: [255, 255, 255, 0.7] }
-            }]
-          }
-        }));
-
+        removeCountrySelection();
+        countryHighlight = countriesLV.highlight([country]);
 
         return confirmedLV.queryObjectIds(query).then(objectIds => {
           // confirmedHighlight = confirmedLV.highlight(objectIds);
@@ -428,6 +456,18 @@ require([
     var recoveredData = result.features.map(f => f.getAttribute("Total_Recovered"));
 
     var ctx = document.getElementById('dashboardLineChart').getContext('2d');
+
+    var gradient = [
+      colors.confirmed,
+      colors.recovered,
+      colors.deaths
+    ].map(color => {
+      var gradient = ctx.createLinearGradient(0, 0, 0, 150);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, colors.countriesOutline);
+      return gradient;
+    });
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -435,14 +475,14 @@ require([
             datasets: [{
               fill: false,
                 label: 'Confirmed',
-                backgroundColor: colors.confirmed,
-                borderColor: colors.confirmed,
+                backgroundColor: gradient[0],
+                borderColor: gradient[0],
                 data: confirmedData,
             }, {
               fill: false,
                 label: 'Recovered',
-                backgroundColor: colors.recovered,
-                borderColor: colors.recovered,
+                backgroundColor: gradient[1],
+                borderColor: gradient[1],
                 data: recoveredData,
             }]
         },
@@ -467,7 +507,7 @@ require([
                     fontColor: "white",
                 }
             }]
-          }
+          },
         }
     });
   });
