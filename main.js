@@ -144,7 +144,7 @@ require([
   });
 
   function resize() {
-    if (view.width < 600) {
+    if (view.width < 695) {
       view.padding = {
         top: 80,
         right: 0,

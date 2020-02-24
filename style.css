@@ -32,7 +32,7 @@ section {
   max-width: 300px;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 695px) {
   section {
     visibility: hidden;
     clear: both;
@@ -136,6 +136,13 @@ a:hover {
 
 @media screen and (max-height: 600px) {
   #dashboardLineChart {
+    visibility: hidden;
+    display: none;
+  }
+}
+
+@media screen and (max-height: 400px) {
+  .dashboard-credits {
     visibility: hidden;
     display: none;
   }
