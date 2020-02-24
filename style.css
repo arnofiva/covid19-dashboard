@@ -32,6 +32,17 @@ section {
   max-width: 300px;
 }
 
+@media screen and (max-width: 600px) {
+  section {
+    visibility: hidden;
+    clear: both;
+    float: left;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+}
+
 .header {
   position: absolute;
   top: 0;
@@ -119,10 +130,13 @@ a:hover {
   height: 300px;
 }
 
-#dashboardLinechart {
-  height: 500px;
-}
-
 #dashboardLineChart {
   margin-top: 100px;
+}
+
+@media screen and (max-height: 600px) {
+  #dashboardLineChart {
+    visibility: hidden;
+    display: none;
+  }
 }

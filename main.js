@@ -4,7 +4,8 @@ require([
   "esri/layers/FeatureLayer",
   "esri/core/promiseUtils",
   "esri/core/watchUtils",
-], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils) {
+  "esri/core/scheduling",
+], function(Map, SceneView, FeatureLayer, promiseUtils, watchUtils, scheduling) {
   var url =
     "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/ncov_cases/FeatureServer/1";
 
@@ -120,15 +121,10 @@ require([
     }
   });
 
-
   var view = new SceneView({
     container: "viewDiv",
     map: map,
     // qualityProfile: "high",
-    padding: {
-      top: 80,
-      right: 360,
-    },
     environment: {
       background: {
         type: "color",
@@ -145,6 +141,38 @@ require([
 
     viewingMode: "global",
     camera: {"position":{"spatialReference":{"latestWkid":4326,"wkid":4326},"x":131.86262861849988,"y":3.309571612356274,"z":20661501.503930703},"heading":15.36981324420197,"tilt":0.11792632041553405},
+  });
+
+  function resize() {
+    if (view.width < 600) {
+      view.padding = {
+        top: 80,
+        right: 0,
+      };
+    } else {
+      view.padding = {
+        top: 80,
+        right: 360,
+      };
+    }
+  }
+  resize();
+  view.on("resize", resize);
+
+  const handle = scheduling.addFrameTask({
+    update: function() {
+      if (!view.interacting) {
+        const camera = view.camera.clone();
+        camera.position.longitude -= 0.25;
+        view.camera = camera;
+      } else {
+        handle.remove();
+      }
+    }
+  });
+
+  view.on("click", function() {
+    handle.remove();
   });
 
   view.when().then(() => {
