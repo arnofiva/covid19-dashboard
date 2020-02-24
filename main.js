@@ -144,17 +144,10 @@ require([
   });
 
   function resize() {
-    if (view.width < 695) {
-      view.padding = {
-        top: 80,
-        right: 0,
-      };
-    } else {
-      view.padding = {
-        top: 80,
-        right: 360,
-      };
-    }
+    view.padding = {
+      top: 25,
+      right: view.width < 695 ? 0 : 360,
+    };
   }
   resize();
   view.on("resize", resize);

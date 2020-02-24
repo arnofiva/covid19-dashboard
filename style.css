@@ -32,17 +32,6 @@ section {
   max-width: 300px;
 }
 
-@media screen and (max-width: 695px) {
-  section {
-    visibility: hidden;
-    clear: both;
-    float: left;
-    margin: 10px auto 5px 20px;
-    width: 28%;
-    display: none;
-  }
-}
-
 .header {
   position: absolute;
   top: 0;
@@ -113,8 +102,10 @@ a:hover {
 .dashboard-credits {
   position: absolute;
   bottom: 20px;
-  width: 80%;
+  right: 50px;
+  width: 260px;
   font-size: 0.8em;
+  text-align: center;
 }
 
 /* .extra{
@@ -126,24 +117,37 @@ a:hover {
   margin-bottom: 20px;
 }
 
-#dashboard-scatterchart {
-  height: 300px;
-}
-
 #dashboardLineChart {
   margin-top: 100px;
+}
+
+@media screen and (max-width: 695px) {
+  section {
+    visibility: hidden;
+    clear: both;
+    float: left;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+
+  .dashboard-credits {
+    width: 100%;
+    right: 0px;
+  }
 }
 
 @media screen and (max-height: 600px) {
   #dashboardLineChart {
     visibility: hidden;
-    display: none;
+    display: none !important;
   }
 }
 
 @media screen and (max-height: 400px) {
-  .dashboard-credits {
+
+  #dashboardBarChart {
     visibility: hidden;
-    display: none;
+    display: none !important;
   }
 }
