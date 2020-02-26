@@ -433,7 +433,7 @@ require([
           // confirmedHighlight = confirmedLV.highlight(objectIds);
           return confirmedLV.queryFeatures(statsQuery).then(result => {
             var stats = result.features[0].attributes;
-            updateBarChart(country.getAttribute("Country"), stats.Confirmed_sum || 0, stats.Recovered_sum || 0, stats.Deaths_sum || 0);
+            updateBarChart(country.getAttribute("Country") || country.getAttribute("COUNTRY"), stats.Confirmed_sum || 0, stats.Recovered_sum || 0, stats.Deaths_sum || 0);
           })
         });
       } else {
