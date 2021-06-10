@@ -2,9 +2,9 @@
 
 Dashboard showing the COVID-19 spread on a 3D globe. Prototype was built with the [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/).
 
-https://jsapi.dev/covid19-dashboard/
+https://arnofiva.github.io/covid19-dashboard/
 
-[![3D Corona Dashboard](screenshot.png)](https://jsapi.dev/covid19-dashboard/)
+[![3D Corona Dashboard](screenshot.png)](https://arnofiva.github.io/covid19-dashboard/)
 
 Data sources from
 [WHO](https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports),
